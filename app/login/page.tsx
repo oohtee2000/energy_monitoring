@@ -6,6 +6,7 @@ import { Zap } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -44,11 +45,12 @@ export default function LoginPage() {
 
       setMessage({ type: "success", text: "Welcome to PowerPal Dashboard!" });
       setTimeout(() => router.push("/dashboard"), 1200);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const firebaseError = error as FirebaseError;
       console.error(error);
       let msg = "Login failed. Please try again.";
-      if (error.code === "auth/user-not-found") msg = "User not found.";
-      else if (error.code === "auth/wrong-password") msg = "Incorrect password.";
+      if (firebaseError.code === "auth/user-not-found") msg = "User not found.";
+      else if (firebaseError.code === "auth/wrong-password") msg = "Incorrect password.";
       setMessage({ type: "error", text: msg });
     }
 
@@ -112,7 +114,7 @@ export default function LoginPage() {
         )}
 
         <p className="mt-6 text-center text-xs text-gray-400">
-          Don't have an account? <a href="/signup" className="text-yellow-600 hover:underline">Sign up here</a>
+          Don&apos;t have an account? <a href="/signup" className="text-yellow-600 hover:underline">Sign up here</a>
         </p>
       </div>
     </div>

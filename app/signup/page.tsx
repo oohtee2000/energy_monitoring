@@ -7,6 +7,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore"; // add this
 import { db } from "@/lib/firebase"; // make sure this is imported
+import { FirebaseError } from "firebase/app";
 
 
 export default function SignupPage() {
@@ -76,11 +77,12 @@ const handleSignup = async (e: React.FormEvent) => {
     setTimeout(() => {
       router.push("/dashboard");
     }, 1500);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const firebaseError = error as FirebaseError;
     let msg = "Signup failed. Please try again.";
-    if (error.code === "auth/email-already-in-use") msg = "Email already in use.";
-    else if (error.code === "auth/invalid-email") msg = "Invalid email format.";
-    else if (error.code === "auth/weak-password") msg = "Password should be at least 6 characters.";
+    if (firebaseError.code === "auth/email-already-in-use") msg = "Email already in use.";
+    else if (firebaseError.code === "auth/invalid-email") msg = "Invalid email format.";
+    else if (firebaseError.code === "auth/weak-password") msg = "Password should be at least 6 characters.";
 
     setMessage({ type: "error", text: msg });
     console.error(error);
